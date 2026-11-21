@@ -2,6 +2,17 @@
 
 문안 CSV → 인스타그램 세로형 PNG(1080×1350) 자동 생성.
 
+Windows PC (맑은 고딕 자동 사용, 별도 설치 불필요):
+
+```powershell
+git clone -b ccr-1ce2e35e-fqqb77 https://github.com/lovekgu2358-jpg/-.git insta-cardnews-auto
+cd insta-cardnews-auto
+pip install -r requirements.txt
+python cardnews/render.py cardnews/content/all_fields_v2.csv --out cardnews/out
+```
+
+Linux:
+
 ```bash
 sudo apt-get install -y fonts-nanum   # 한글 글꼴 (OFL, 상업 이용 가능)
 python3 cardnews/render.py cardnews/content/fruit_v1.csv --out cardnews/out

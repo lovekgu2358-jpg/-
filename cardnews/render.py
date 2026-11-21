@@ -16,8 +16,24 @@ from PIL import Image, ImageDraw, ImageFont
 
 WIDTH, HEIGHT = 1080, 1350  # 인스타그램 세로형 4:5
 MARGIN = 96
-FONT_BOLD = "/usr/share/fonts/truetype/nanum/NanumSquareB.ttf"
-FONT_REG = "/usr/share/fonts/truetype/nanum/NanumSquareR.ttf"
+def _pick_font(candidates):
+    """존재하는 첫 글꼴 경로를 반환. 리눅스(나눔) -> Windows(맑은 고딕) 순."""
+    for path in candidates:
+        if path and os.path.exists(path):
+            return path
+    raise FileNotFoundError(f"한글 글꼴을 찾을 수 없음: {candidates}")
+
+
+FONT_BOLD = _pick_font([
+    os.environ.get("CARDNEWS_FONT_BOLD"),
+    "/usr/share/fonts/truetype/nanum/NanumSquareB.ttf",
+    r"C:\Windows\Fonts\malgunbd.ttf",
+])
+FONT_REG = _pick_font([
+    os.environ.get("CARDNEWS_FONT_REG"),
+    "/usr/share/fonts/truetype/nanum/NanumSquareR.ttf",
+    r"C:\Windows\Fonts\malgun.ttf",
+])
 
 # 세트별 색 (배경, 강조). 세트 번호가 더 많으면 순환.
 THEMES = [
