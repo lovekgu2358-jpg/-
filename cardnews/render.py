@@ -97,10 +97,20 @@ def _draw_block(draw, lines, font, x, y, fill, line_gap):
     return y
 
 
-def render_slide(slide, total, theme):
+DISCLOSURE = "이 게시물은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."
+
+
+def render_slide(slide, total, theme, disclosure=None):
     bg, accent = theme
     img = Image.new("RGB", (WIDTH, HEIGHT), bg)
     draw = ImageDraw.Draw(img)
+    if disclosure and slide["role"] == "표지":
+        # 광고 표시: 표지 맨 위, 배경과 대비되는 띠 위에 표시
+        d_font = ImageFont.truetype(FONT_BOLD, 28)
+        d_lines = wrap_text(disclosure, d_font, WIDTH - MARGIN * 2, draw)
+        band_h = 40 + len(d_lines) * 40
+        draw.rectangle([0, 0, WIDTH, band_h], fill="#333333")
+        _draw_block(draw, d_lines, d_font, MARGIN, 24, "#FFFFFF", 12)
     max_w = WIDTH - MARGIN * 2
     role = slide["role"]
 
@@ -141,7 +151,7 @@ def render_slide(slide, total, theme):
     return img
 
 
-def render_all(csv_path, out_dir):
+def render_all(csv_path, out_dir, disclosure=None):
     sets = load_slides(csv_path)
     written = []
     for set_no in sorted(sets):
@@ -150,7 +160,7 @@ def render_all(csv_path, out_dir):
         set_dir = os.path.join(out_dir, f"set{set_no:02d}")
         os.makedirs(set_dir, exist_ok=True)
         for slide in slides:
-            img = render_slide(slide, len(slides), theme)
+            img = render_slide(slide, len(slides), theme, disclosure)
             path = os.path.join(set_dir, f"{slide['page']:02d}.png")
             img.save(path, "PNG")
             written.append(path)
@@ -161,8 +171,10 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="카드뉴스 CSV -> PNG")
     parser.add_argument("csv_path")
     parser.add_argument("--out", default="cardnews/out")
+    parser.add_argument("--affiliate", action="store_true",
+                        help="쿠팡 파트너스 링크를 붙일 게시물: 표지에 광고 표시 문구를 넣는다")
     args = parser.parse_args(argv)
-    written = render_all(args.csv_path, args.out)
+    written = render_all(args.csv_path, args.out, DISCLOSURE if args.affiliate else None)
     print(f"{len(written)}장 생성 -> {args.out}")
     return 0
 
