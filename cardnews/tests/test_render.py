@@ -29,11 +29,22 @@ class TestLoad(unittest.TestCase):
             self.assertEqual(slides[-1]["role"], "CTA")
 
     def test_no_sales_wording_in_content(self):
-        # 과일 판매 전이므로 판매/직송 문구가 들어가면 안 됨
-        with open(CONTENT, encoding="utf-8") as f:
-            text = f.read()
-        for word in ["직송", "판매", "구매", "주문", "가격"]:
-            self.assertNotIn(word, text)
+        # 판매/제휴 전이므로 모든 문안에 판매·직송 문구가 들어가면 안 됨
+        import glob
+        files = glob.glob(os.path.join(os.path.dirname(CONTENT), "*.csv"))
+        self.assertGreaterEqual(len(files), 2)
+        for path in files:
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+            for word in ["직송", "판매", "구매", "주문", "가격", "할인", "링크"]:
+                self.assertNotIn(word, text, f"{os.path.basename(path)}: '{word}'")
+
+    def test_all_fields_content_has_4_sets(self):
+        path = os.path.join(os.path.dirname(CONTENT), "all_fields_v1.csv")
+        sets = render.load_slides(path)
+        self.assertEqual(sorted(sets), [1, 2, 3, 4])
+        with tempfile.TemporaryDirectory() as out:
+            self.assertEqual(len(render.render_all(path, out)), 24)
 
     def test_bad_role_rejected(self):
         path = write_csv([[1, 1, "엉뚱", "제목", "본문"]])
