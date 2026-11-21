@@ -46,6 +46,13 @@ class TestLoad(unittest.TestCase):
         with tempfile.TemporaryDirectory() as out:
             self.assertEqual(len(render.render_all(path, out)), 24)
 
+    def test_all_fields_v2_has_13_sets(self):
+        path = os.path.join(os.path.dirname(CONTENT), "all_fields_v2.csv")
+        sets = render.load_slides(path)
+        self.assertEqual(sorted(sets), list(range(1, 14)))
+        with tempfile.TemporaryDirectory() as out:
+            self.assertEqual(len(render.render_all(path, out)), 78)
+
     def test_bad_role_rejected(self):
         path = write_csv([[1, 1, "엉뚱", "제목", "본문"]])
         with self.assertRaises(ValueError):
